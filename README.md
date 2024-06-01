@@ -25,9 +25,10 @@ PhonePe Github Repositry
 Libraries used:
 
 SQL libraries:
-import mysql.connector
 
-import sqlalchemy.types
+  import mysql.connector
+
+  import sqlalchemy.types
 
 from sqlalchemy import create_engine
 
