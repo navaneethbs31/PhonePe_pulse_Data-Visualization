@@ -1,43 +1,59 @@
 # PhonePe_pulse_Data-Visualization
 
-Domain:
-Fintech
+# Domain: Fintech
 
 PhonePe has become one of the most popular digital payment platforms in India, with millions of users relying on it for their day-to-day transactions. The app is known for its simplicity, user-friendly interface, and fast and secure payment processing. It has also won several awards and accolades for its innovative features and contributions to the digital payments industry.
 
 We create a web app to analyse the Phonepe transaction and users depending on various Years, Quarters, States, and Types of transaction and give a Geographical and Geo visualization output based on given requirements.
 
 
-Problem Statement:
+# Problem Statement:
 
 The Phonepe pulse Github repository contains a large amount of data related to various metrics and statistics. The goal is to extract this data and process it to obtain insights and information that can be visualized in a user-friendly manner.
 
 Tools Used:
 
 Python
+
 MySQL
+
 Streamlit
+
 PhonePe Github Repositry
 
 
 Libraries used:
 
-# [SQL libraries]
+SQL libraries:
 import mysql.connector
+
 import sqlalchemy.types
+
 from sqlalchemy import create_engine
-# [pandas and file handling libraries]
+
+
+pandas,numpy and file handling libraries:
+
 import pandas 
-import numpy 
+
+import numpy
+
 import json
-# [clone library]
+
+
+clone library:
+
 import requests
-# [Dashboard Libraries]
-import streamlit 
+
+
+Dashboard Libraries
+
+import streamlit
+
 import plotly.express 
 
 
-Approach:
+# Approach:
 
 1. Data extraction: Clone the Github using scripting to fetch the data from the Phonepe pulse Github repository and store it in a suitable format such as CSV or JSON.
 2. Data transformation: Use a scripting language such as Python, along with libraries such as Pandas, to manipulate and pre-process the data. This may include cleaning the data, handling missing values, and transforming the data into a format suitable for analysis and visualization.
@@ -46,7 +62,7 @@ Approach:
 5. Data retrieval: Use the "mysql-connector-python" library to connect to the MySQL database and fetch the data into a Pandas dataframe. Use the data in the dataframe to update the dashboard dynamically.
 6. Deployment: Ensure the solution is secure, efficient, and user-friendly. Test the solution thoroughly and deploy the dashboard publicly, making it accessible to users.
 
-Features:
+# Features:
 
 
 The result of this project will be a live geo visualization dashboard that displays information and insights from the Phonepe pulse Github repository in an interactive and visually appealing manner.
