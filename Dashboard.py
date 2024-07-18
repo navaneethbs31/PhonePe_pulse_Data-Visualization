@@ -6,6 +6,7 @@ import json
 import requests
 import streamlit as st
 import plotly.express as px
+from tabulate import tabulate
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -33,9 +34,9 @@ if select == "Home":
     st.write("1. All India")
     st.write("2. State Wise")
     st.write("3. Top Ten Categories")
-    st.write("4. Facts and Figures")
+    st.write("4. Insights")
 elif select=="Explore Data":
-    option = st.radio("**Select your option**",("All India","State Wise","Top Ten Categories","Facts and Figures"),horizontal=True)
+    option = st.radio("**Select your option**",("All India","State Wise","Top Ten Categories","Insights"),horizontal=True)
     if option=="All India":
         tab1,tab2 = st.tabs(["Transaction","User"])
     #================================================= All India Transaction ==============================================
@@ -307,123 +308,179 @@ elif select=="Explore Data":
             st.dataframe(df_user_qry_result1)
 
     else:
-            year = st.selectbox("**Select Year**", ("2018", "2019", "2020", "2021", "2022", "2023", "2024"),key="year")
-            selected_option = st.selectbox("**Select Category**",
-                                           ("Total Transaction Amount",
-                                            "Total Transaction Count",
-                                            "Average Transaction Amount",
-                                            "Average Transaction Count",
-                                            "Registered PhonePe Users",
-                                            "PhonePe app opens",
-                                            "Recharge & bill payments",
-                                            "Peer-to-peer payments",
-                                            "Merchant payments",
-                                            "Financial services",
-                                            "Other payments",
-                                            "Top 10 states transaction based on Amount",
-                                            "Top 10 states Transaction on Count",
-                                            "Top 10 states based on Users")
-                                           )
-            if selected_option=="Total Transaction Amount":
-                mycursor.execute(f"SELECT SUM(Transaction_Amount) from aggregated_transaction where Year = '{year}' ")
-                total_trans_amt_result = mycursor.fetchall()
-                df_total_trans_amt_result = pd.DataFrame(np.array(total_trans_amt_result), columns=["Total Transaction Amount"])
-                df_total_trans_amt_result1 = df_total_trans_amt_result.set_index(pd.Index(range(1, len(df_total_trans_amt_result) + 1)))
-                st.dataframe(df_total_trans_amt_result1)
+            selected_option = st.selectbox("Facts and Figures: ", ["Please Select one",
+                                       "The year which has the most No. of Transactions",
+                                       "The most prominent payment type of Phonepe across years",
+                                       "A state who loves the phonepe app the most",
+                                       "An effective payment method during the Covid-19 Lockdown period(2019-2020)",
+                                       "The Quarter which tops the transaction list very often across years",
+                                       "The Quarter which tops the transaction value list very often across years",
+                                       "A state which has Highest PhonePe Transacted Value",
+                                       "The state which has the most PhonePe registered users of all time",
+                                       "The year which recorded most no of App opens across India",
+                                       "The year which recorded highest no of Registered users across India",
+                                       "State with Highest PhonePe Registered Users in current year 2024",
+                                       "State with Highest PhonePe Transaction Value in current year 2024",
+                                       "The States with the lowest PhonePe Usage"
+                                                                   ])
 
-            elif selected_option=="Total Transaction Count":
-                mycursor.execute(f"SELECT SUM(Transaction_Count) from aggregated_transaction where Year ='{year}'")
-                total_trans_count_result = mycursor.fetchall()
-                df_total_trans_count_result = pd.DataFrame(np.array(total_trans_count_result), columns=["Total Transaction Count"])
-                df_total_trans_count_result1 = df_total_trans_count_result.set_index(pd.Index(range(1, len(df_total_trans_count_result) + 1)))
-                st.dataframe(df_total_trans_count_result1)
+            if selected_option=="Please Select one":
+                st.text("Please Choose any one Query")
 
-            elif selected_option == "Average Transaction Amount":
-                mycursor.execute(f"SELECT AVG(Transaction_Amount) from aggregated_transaction where Year ='{year}'")
-                avg_trans_amt_result = mycursor.fetchall()
-                df_avg_trans_amt_result = pd.DataFrame(np.array(avg_trans_amt_result), columns=["Average Transaction Amount"])
-                df_avg_trans_amt_result1 = df_avg_trans_amt_result.set_index(
-                    pd.Index(range(1, len(df_avg_trans_amt_result) + 1)))
-                st.dataframe(df_avg_trans_amt_result1)
+            elif selected_option=="The year which has the most No. of Transactions":
+                mycursor.execute(f"SELECT Year, SUM(Transaction_Count) from aggregated_transaction group by Year ")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Year", "Transact"])
+                df["Year"] = df["Year"].astype(str)
+                fig = px.bar(df, x="Year", y="Transact", color=df["Transact"], labels={"Transact": "Transactions"})
+                st.plotly_chart(fig)
+                st.success("2023 has the most no of Transactions so far")
 
-            elif selected_option=="Average Transaction Count":
-                mycursor.execute(f"SELECT AVG(Transaction_Count) from aggregated_transaction where Year ='{year}' ")
-                avg_trans_count_result = mycursor.fetchall()
-                df_avg_trans_count_result = pd.DataFrame(np.array(avg_trans_count_result), columns=["Average Transaction Count"])
-                df_avg_trans_count_result1 = df_avg_trans_count_result.set_index(pd.Index(range(1, len(df_avg_trans_count_result) + 1)))
-                st.dataframe(df_avg_trans_count_result1)
+            elif selected_option=="The most prominent payment type of Phonepe across years":
+                mycursor.execute(f"SELECT Transaction_Name, SUM(Transaction_Amount) from aggregated_transaction group by Transaction_Name")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Payment type", "Transactions"])
+                fig = px.bar(df, x="Payment type", y="Transactions", color=df["Transactions"])
+                st.plotly_chart(fig)
+                st.success("Peer to Peer Payments was the most prominent payment type across people over years")
 
-            elif selected_option== "Registered PhonePe Users":
-                mycursor.execute(f"SELECT SUM(Registered_Users) from map_user where Year ='{year}' ")
-                total_user_count_result = mycursor.fetchall()
-                df_total_user_count_result = pd.DataFrame(np.array(total_user_count_result),columns=["Registered PhonePe Users"])
-                df_total_user_count_result1 = df_total_user_count_result.set_index(pd.Index(range(1, len(df_total_user_count_result) + 1)))
-                st.dataframe(df_total_user_count_result1)
+            elif selected_option == "A state who loves the phonepe app the most":
+                mycursor.execute(f"SELECT State, SUM(Transaction_Count) from map_transaction group by State order by SUM(Transaction_Count) desc limit 5 ")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State name", "No. of Transactions"])
+                fig = px.bar(df, x="State name", y="No. of Transactions", color=df["No. of Transactions"])
+                st.plotly_chart(fig)
+                st.success("Maharashtra has made the most use of PhonePe very often")
 
-            elif selected_option == "PhonePe app opens":
-                mycursor.execute(f"SELECT SUM(App_opens) from map_user where Year ='{year}'")
-                avg_user_count_result = mycursor.fetchall()
-                df_avg_user_count_result = pd.DataFrame(np.array(avg_user_count_result), columns=["PhonePe app opens"])
-                df_avg_user_count_result1 = df_avg_user_count_result.set_index(pd.Index(range(1, len(df_avg_user_count_result) + 1)))
-                st.dataframe(df_avg_user_count_result1)
+            elif selected_option=="An effective payment method during the Covid-19 Lockdown period(2019-2020)":
+                mycursor.execute(f"SELECT Transaction_Name, SUM(Transaction_Amount) from aggregated_transaction where Year between 2019 and 2021 group by Transaction_Name order by SUM(Transaction_Amount) desc limit 5  ")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Payment type", "Transactions"])
+                fig = px.bar(df, x="Payment type", y="Transactions", color=df["Transactions"])
+                st.plotly_chart(fig)
+                st.success("Peer to Peer Payments was the most prominent payment type during Covid-19.")
 
-            elif selected_option=="Recharge & bill payments":
-                mycursor.execute(f"SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year ='{year}' and Transaction_Name = 'Recharge & bill payments' group by State")
-                trans_qry_result = mycursor.fetchall()
-                df_trans_qry_result = pd.DataFrame(np.array(trans_qry_result), columns=["State", "Transaction_Amount"])
-                df_trans_qry_result1 = df_trans_qry_result.set_index(pd.Index(range(1, len(df_trans_qry_result) + 1)))
-                st.dataframe(df_trans_qry_result1)
+            elif selected_option== "The Quarter which tops the transaction list very often across years":
+                mycursor.execute("SELECT Quarter, SUM(Transaction_Count) from aggregated_transaction group by Quarter")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Quarter", "No. of Transactions"])
+                df["Quarter"] = df["Quarter"].astype(str)
+                fig = px.bar(df, x="Quarter", y="No. of Transactions", color=df["No. of Transactions"])
+                st.plotly_chart(fig)
+                st.success("First Quarter Tops the Chart with a good margin")
 
-            elif selected_option=="Peer-to-peer payments":
+            elif selected_option == "The Quarter which tops the transaction value list very often across years":
+                mycursor.execute("SELECT Quarter, SUM(Transaction_Amount) from aggregated_transaction group by Quarter")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Quarter", "Transaction value"])
+                df["Quarter"] = df["Quarter"].astype(str)
+                fig = px.bar(df, x="Quarter", y="Transaction value", color=df["Transaction value"])
+                st.plotly_chart(fig)
+                st.success("First Quarter Tops the Chart with a good margin")
+
+            elif selected_option == "A state which has Highest PhonePe Transacted Value":
+                mycursor.execute("SELECT State, SUM(Transaction_Amount) from map_transaction group by State order by SUM(Transaction_Amount) desc limit 5 ")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State name", "Transaction Amount"])
+                fig = px.bar(df, x="State name", y="Transaction Amount", color=df["Transaction Amount"])
+                st.plotly_chart(fig)
+                st.success("Telangana has made the Highest PhonePe Transaction Value")
+
+            elif selected_option=="The state which has the most PhonePe registered users of all time":
+                mycursor.execute(f"SELECT State,SUM(Registered_Users) from top_user group by State order by SUM(Registered_Users) desc limit 5")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State", "No. of Registered Users"])
+                fig = px.bar(df, x="State", y="No. of Registered Users", color=df["No. of Registered Users"])
+                st.plotly_chart(fig)
+                st.success("Delhi has more PhonePe users than other state in INDIA.")
+
+            elif selected_option=="The year which recorded most no of App opens across India":
+                mycursor.execute("SELECT Year,SUM(App_opens) from map_user group by Year")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Year", "App Opens"])
+                df["Year"] = df["Year"].astype(str)
+                fig = px.bar(df, x="Year", y="App Opens", color=df["App Opens"])
+                st.plotly_chart(fig)
+                st.success("2023 wins the chart for most no. of app opens across India")
+
+            elif selected_option=="The year which recorded highest no of Registered users across India":
+                mycursor.execute("SELECT Year,SUM(Registered_Users) from map_user group by Year")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["Year", "Registered Users"])
+                df["Year"] = df["Year"].astype(str)
+                fig = px.bar(df, x="Year", y="Registered Users", color=df["Registered Users"])
+                st.plotly_chart(fig)
+                st.success("2023 has more success among the other years")
+
+            elif selected_option == "State with Highest PhonePe Registered Users in current year 2024":
+                mycursor.execute("SELECT State,SUM(Registered_Users) from map_user where Year='2024' group by State order by SUM(Registered_Users) desc limit 5")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State", "Registered Users"])
+                fig = px.bar(df, x="State", y="Registered Users", color=df["Registered Users"])
+                st.plotly_chart(fig)
+                st.success("Maharashtra has highest PhonePe registered users in current year 2024")
+
+            elif selected_option == "State with Highest PhonePe Transaction Value in current year 2024":
                 mycursor.execute(
-                    f"SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year ='{year}' and Transaction_Name = 'Peer-to-peer payments' group by State")
-                trans_qry_result = mycursor.fetchall()
-                df_trans_qry_result = pd.DataFrame(np.array(trans_qry_result), columns=["State", "Transaction_Amount"])
-                df_trans_qry_result1 = df_trans_qry_result.set_index(pd.Index(range(1, len(df_trans_qry_result) + 1)))
-                st.dataframe(df_trans_qry_result1)
+                    "SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year='2024' group by State order by SUM(Transaction_Amount) desc limit 5")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State", "Transaction Value"])
+                fig = px.bar(df, x="State", y="Transaction Value", color=df["Transaction Value"])
+                st.plotly_chart(fig)
+                st.success("Karnataka has highest PhonePe transaction value in current year 2024")
 
-            elif selected_option=="Merchant payments":
-                mycursor.execute(
-                    f"SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year ='{year}' and Transaction_Name = 'Merchant payments' group by State")
-                trans_qry_result = mycursor.fetchall()
-                df_trans_qry_result = pd.DataFrame(np.array(trans_qry_result), columns=["State", "Transaction_Amount"])
-                df_trans_qry_result1 = df_trans_qry_result.set_index(pd.Index(range(1, len(df_trans_qry_result) + 1)))
-                st.dataframe(df_trans_qry_result1)
+            elif selected_option =="The States with the lowest PhonePe Usage":
+                mycursor.execute("SELECT State,SUM(App_opens) from map_user group by State order by SUM(App_opens) limit 5")
+                out = mycursor.fetchall()
+                df = pd.DataFrame(out, columns=["State", "App opens"])
+                fig = px.bar(df, x="State", y="App opens", color=df["App opens"])
+                st.plotly_chart(fig)
+                st.success("Lakshadweep and Andaman-&-Nicobar-islands are unfamiliar about Phonepe in INDIA.")
 
-            elif selected_option =="Financial services":
-                mycursor.execute(
-                    f"SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year ='{year}' and Transaction_Name = 'Financial Services' group by State")
-                trans_qry_result = mycursor.fetchall()
-                df_trans_qry_result = pd.DataFrame(np.array(trans_qry_result), columns=["State", "Transaction_Amount"])
-                df_trans_qry_result1 = df_trans_qry_result.set_index(pd.Index(range(1, len(df_trans_qry_result) + 1)))
-                st.dataframe(df_trans_qry_result1)
+            mycursor.execute("select Year,SUM(Registered_Users),SUM(App_opens) from map_user group by Year")
+            out = mycursor.fetchall()
+            df = pd.DataFrame(out, columns=["Year", "Registered Users", "App Opens"])
+            col1, col2 = st.columns(2)
+            with col1:
+                fig = px.line(df, x="Year", y="Registered Users", title="Phonepe Users Growth Over the Years")
+                st.plotly_chart(fig)
+            with col2:
+                fig1 = px.line(df, x="Year", y="App Opens", title="Phonepe App opens Growth Over the Years")
+                st.plotly_chart(fig1)
 
-            elif selected_option =="Other payments":
-                mycursor.execute(
-                    f"SELECT State,SUM(Transaction_Amount) from aggregated_transaction where Year ='{year}' and Transaction_Name = 'Others' group by State")
-                trans_qry_result = mycursor.fetchall()
-                df_trans_qry_result = pd.DataFrame(np.array(trans_qry_result), columns=["State", "Transaction_Amount"])
-                df_trans_qry_result1 = df_trans_qry_result.set_index(pd.Index(range(1, len(df_trans_qry_result) + 1)))
-                st.dataframe(df_trans_qry_result1)
 
-            elif selected_option == "Top 10 states transaction based on Amount":
-                mycursor.execute(f"SELECT State,SUM(Amount) as Amount from top_transaction where Year = '{year}' group by State order by Amount DESC LIMIT 10")
-                top_trans_result = mycursor.fetchall()
-                df_top_trans_result = pd.DataFrame(np.array(top_trans_result),columns=["State", "Total Transaction Amount"])
-                df_top_trans_result1 = df_top_trans_result.set_index(pd.Index(range(1, len(df_top_trans_result) + 1)))
-                st.dataframe(df_top_trans_result1)
 
-            elif selected_option=="Top 10 states Transaction on Count":
-                mycursor.execute(f"SELECT State,SUM(Count) as Count from top_transaction where Year='{year}' group by State order by Count DESC LIMIT 10")
-                top_trans_count_result = mycursor.fetchall()
-                df_top_trans_count_result = pd.DataFrame(np.array(top_trans_count_result),columns=["State","Total Transaction Count"])
-                df_top_trans_count_result1 = df_top_trans_count_result.set_index(pd.Index(range(1, len(df_top_trans_count_result) + 1)))
-                st.dataframe(df_top_trans_count_result1)
 
-            elif selected_option=="Top 10 states based on Users":
-                mycursor.execute(f"SELECT State, SUM(Registered_Users) as Top_user from top_user where Year='{year}' group by State order by Top_user DESC LIMIT 10")
-                top_user_qry_result = mycursor.fetchall()
-                df_top_user_qry_result = pd.DataFrame(np.array(top_user_qry_result), columns=["State", "Phonepe Registered Users"])
-                df_top_user_qry_result1 = df_top_user_qry_result.set_index(pd.Index(range(1, len(df_top_user_qry_result) + 1)))
-                st.dataframe(df_top_user_qry_result1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
